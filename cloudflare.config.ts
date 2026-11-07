@@ -31,14 +31,18 @@ export default defineConfig({
       ASSETS: bindings.assets(),
       IMAGES: bindings.images(),
 
-      // Supabase
+      // Supabase public configuration
       NEXT_PUBLIC_SUPABASE_URL: bindings.secret(),
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.secret(),
+
+      // Supabase server-only credential
       SUPABASE_SERVICE_ROLE_KEY: bindings.secret(),
 
-      // Booking security
+      // Cloudflare Turnstile
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: bindings.secret(),
       TURNSTILE_SECRET_KEY: bindings.secret(),
 
-      // Email notifications
+      // Resend email notifications
       RESEND_API_KEY: bindings.secret(),
       BOOKING_FROM_EMAIL: bindings.secret(),
       PAOLA_ADMIN_EMAIL: bindings.secret(),

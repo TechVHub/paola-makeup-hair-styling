@@ -53,8 +53,10 @@ function serviceImage(service: Service) {
       .getPublicUrl(service.image_path).data.publicUrl;
   }
 
-  return fallbackImages[service.category] ??
-    fallbackImages.makeup;
+  return (
+    fallbackImages[service.category] ??
+    fallbackImages.makeup
+  );
 }
 
 function portfolioImage(path: string) {
@@ -93,8 +95,7 @@ export default function HomePage() {
             supabase
               .from("services")
               .select(
-                "id,name,category,description,price," +
-                "price_is_starting_at,duration_minutes,image_path"
+                "id,name,category,description,price,price_is_starting_at,duration_minutes,image_path"
               )
               .eq("is_active", true)
               .order("sort_order"),
@@ -116,10 +117,8 @@ export default function HomePage() {
 
         if (!active) return;
 
-        setServices((serviceResult.data ?? []) as Service[]);
-        setPhotos(
-          (photoResult.data ?? []) as PortfolioPhoto[]
-        );
+        setServices(serviceResult.data ?? []);
+        setPhotos(photoResult.data ?? []);
       } catch (err) {
         if (active) {
           setError(

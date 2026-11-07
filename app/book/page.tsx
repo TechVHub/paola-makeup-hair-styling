@@ -120,8 +120,7 @@ function BookingContent() {
           await getSupabase()
             .from("services")
             .select(
-              "id,name,category,description,price," +
-                "price_is_starting_at,duration_minutes"
+              "id,name,category,description,price,price_is_starting_at,duration_minutes"
             )
             .eq("is_active", true)
             .order("sort_order");
@@ -130,7 +129,7 @@ function BookingContent() {
 
         if (!active) return;
 
-        const availableServices = (data ?? []) as Service[];
+        const availableServices: Service[] = data ?? [];
         setServices(availableServices);
 
         const requested = availableServices.find(
@@ -338,7 +337,7 @@ function BookingContent() {
               </p>
 
               <p>
-                <strong>Date & Time:</strong>{" "}
+                <strong>Date &amp; Time:</strong>{" "}
                 {formatAppointment(success.startsAt)}
               </p>
 
@@ -378,7 +377,7 @@ function BookingContent() {
       <header className={styles.header}>
         <Link href="/" className={styles.brand}>
           PAOLA
-          <span>MAKEUP & HAIR STYLES</span>
+          <span>MAKEUP &amp; HAIR STYLES</span>
         </Link>
 
         <Link href="/" className={styles.backLink}>
@@ -442,7 +441,7 @@ function BookingContent() {
 
               <div className={styles.sectionTitle}>
                 <span>02</span>
-                <h2>Select Date & Time</h2>
+                <h2>Select Date &amp; Time</h2>
               </div>
 
               <label className={styles.field}>
@@ -631,7 +630,7 @@ function BookingContent() {
               </button>
 
               <p className={styles.note}>
-                Appointments are subject to Paola's
+                Appointments are subject to Paola&apos;s
                 confirmation. No payment is collected
                 through this form.
               </p>

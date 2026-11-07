@@ -1,0 +1,36 @@
+{
+  "name": "paola-makeup-hair-styling",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm",
+  "dependencies": {
+    "@marsidev/react-turnstile": "^1.6.3",
+    "@supabase/supabase-js": "^2.119.0",
+    "@vinext/cloudflare": "^1.3.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-server-dom-webpack": "^19.3.1",
+    "resend": "^6.37.0",
+    "vinext": "^1.4.3"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^2.0.0-beta.v.12",
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vitejs/plugin-react": "^6.2.1",
+    "@vitejs/plugin-rsc": "^0.5.39",
+    "cf": "^1.0.0-beta.27",
+    "tailwindcss": "latest",
+    "typescript": "latest",
+    "vite": "^8.3.0"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "vite preview",
+    "deploy": "vinext-cloudflare deploy"
+  }
+}

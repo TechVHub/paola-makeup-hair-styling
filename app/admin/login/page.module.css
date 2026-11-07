@@ -1,0 +1,417 @@
+
+/* ==========================================
+   PAOLA MAKEUP & HAIR STYLES
+   ADMIN LOGIN
+   PHASE 7B-07 — MOBILE OPTIMIZATION
+   ========================================== */
+
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px 20px;
+
+  background: #0a0a0a;
+  color: #111111;
+
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.page * {
+  box-sizing: border-box;
+}
+
+/* LOGIN CARD */
+
+.loginCard {
+  width: 100%;
+  max-width: 460px;
+
+  padding: 55px 45px;
+
+  background: #ffffff;
+  text-align: center;
+}
+
+/* BRAND */
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  color: #111111;
+  text-decoration: none;
+
+  font-family: Georgia, serif;
+  font-size: 42px;
+  letter-spacing: 7px;
+}
+
+.brand span {
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.divider {
+  width: 70px;
+  height: 2px;
+
+  margin: 30px auto;
+
+  background: #111111;
+}
+
+.eyebrow {
+  color: #888888;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+.loginCard h1 {
+  margin: 20px 0 10px;
+
+  font-family: Georgia, serif;
+  font-size: 37px;
+  font-weight: 400;
+}
+
+.subtitle {
+  margin: 0 0 35px;
+
+  color: #777777;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* FORM */
+
+.form {
+  width: 100%;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  margin-bottom: 22px;
+  text-align: left;
+}
+
+.field span,
+.field > label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field input {
+  display: block;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+
+  padding: 15px;
+
+  border: 1px solid #cccccc;
+  border-radius: 0;
+
+  background: #ffffff;
+  color: #111111;
+
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.field input:focus {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
+}
+
+.field input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* PASSWORD FIELD */
+
+.passwordWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.passwordWrapper input {
+  padding-right: 85px;
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+
+  transform: translateY(-50%);
+
+  min-width: 65px;
+  min-height: 44px;
+
+  padding: 8px 10px;
+
+  border: none;
+  background: transparent;
+  color: #111111;
+
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  cursor: pointer;
+}
+
+.passwordToggle:hover {
+  color: #666666;
+}
+
+.passwordToggle:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
+}
+
+/* SIGN IN BUTTON */
+
+.loginButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 54px;
+
+  padding: 18px;
+
+  border: none;
+  border-radius: 0;
+
+  background: #111111;
+  color: #ffffff;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+
+  cursor: pointer;
+}
+
+.loginButton:hover:not(:disabled) {
+  background: #333333;
+}
+
+.loginButton:disabled {
+  background: #888888;
+  cursor: not-allowed;
+}
+
+.loginButton:focus-visible {
+  outline: 2px solid #555555;
+  outline-offset: 3px;
+}
+
+/* ERROR MESSAGE */
+
+.error {
+  padding: 15px;
+  margin-bottom: 20px;
+
+  border: 1px solid #cc7777;
+
+  background: #fff2f2;
+  color: #992222;
+
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.7;
+
+  overflow-wrap: anywhere;
+}
+
+/* RETURN LINK */
+
+.homeLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+  margin-top: 25px;
+
+  color: #777777;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.homeLink:hover {
+  color: #111111;
+}
+
+.homeLink:focus-visible,
+.brand:focus-visible {
+  outline: 2px solid #555555;
+  outline-offset: 4px;
+}
+
+/* LOADING STATE */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+
+  color: #ffffff;
+  text-align: center;
+  font-size: 13px;
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+
+  border: 3px solid #555555;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================
+   TABLET
+   ========================================== */
+
+@media (max-width: 768px) {
+  .page {
+    padding: 30px 20px;
+  }
+
+  .loginCard {
+    max-width: 460px;
+    padding: 45px 35px;
+  }
+}
+
+/* ==========================================
+   MOBILE
+   ========================================== */
+
+@media (max-width: 500px) {
+  .page {
+    align-items: center;
+    padding: 20px 15px;
+  }
+
+  .loginCard {
+    padding: 40px 25px;
+  }
+
+  .brand {
+    font-size: 38px;
+    letter-spacing: 6px;
+  }
+
+  .divider {
+    margin: 25px auto;
+  }
+
+  .loginCard h1 {
+    font-size: 34px;
+  }
+
+  .subtitle {
+    margin-bottom: 28px;
+    font-size: 13px;
+  }
+
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field input {
+    min-height: 54px;
+    font-size: 16px;
+  }
+
+  .loginButton {
+    min-height: 56px;
+  }
+}
+
+/* ==========================================
+   SMALL PHONES
+   ========================================== */
+
+@media (max-width: 380px) {
+  .page {
+    padding: 15px 10px;
+  }
+
+  .loginCard {
+    padding: 35px 18px;
+  }
+
+  .brand {
+    font-size: 34px;
+    letter-spacing: 5px;
+  }
+
+  .brand span {
+    font-size: 8px;
+  }
+
+  .loginCard h1 {
+    font-size: 31px;
+  }
+
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+}
+
+/* SHORT MOBILE SCREENS */
+
+@media (max-height: 650px) {
+  .page {
+    align-items: flex-start;
+  }
+
+  .loginCard {
+    margin: auto;
+  }
+}
+
+/* REDUCED MOTION */
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingSpinner {
+    animation: none;
+  }
+
+  .page *,
+  .page *::before,
+  .page *::after {
+    transition: none !important;
+  }
+}

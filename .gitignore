@@ -1,0 +1,11 @@
+node_modules
+.env*
+.next
+next-env.d.ts
+/dist/
+.vinext/
+.cloudflare/
+.env.local
+.dev.vars
+.dev.vars.*
+app/api/bookings/route.backup.ts.txt

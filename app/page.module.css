@@ -1,0 +1,993 @@
+
+/* ==========================================
+   PAOLA MAKEUP & HAIR STYLES
+   HOMEPAGE STYLES
+   PHASE 7B-02 — MOBILE RESPONSIVENESS
+   ========================================== */
+
+.site {
+  --black: #080808;
+  --dark: #151515;
+  --white: #ffffff;
+  --light: #f5f5f5;
+  --gray: #777777;
+
+  background: #ffffff;
+  color: #111111;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.site * {
+  box-sizing: border-box;
+}
+
+.site a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ==========================================
+   TOP ANNOUNCEMENT BAR
+   ========================================== */
+
+.topBar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  background: #000000;
+  color: #ffffff;
+  padding: 13px 20px;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+.topBar span {
+  font-size: 8px;
+}
+
+/* ==========================================
+   DESKTOP HEADER
+   ========================================== */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 25px;
+  padding: 23px 6%;
+  background: #000000;
+  color: #ffffff;
+  border-top: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.brandName {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 44px;
+  letter-spacing: 9px;
+  line-height: 1;
+}
+
+.brandSubtitle {
+  font-size: 9px;
+  letter-spacing: 2px;
+  margin-top: 8px;
+}
+
+.nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+.nav a {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: opacity 0.2s;
+}
+
+.nav a:hover {
+  opacity: 0.55;
+}
+
+.headerButton {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  background: #ffffff;
+  color: #000000 !important;
+  padding: 17px 25px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.headerButton:hover {
+  background: #dddddd;
+}
+
+/* Hidden on desktop */
+
+.menuToggle,
+.mobileNav {
+  display: none;
+}
+
+/* Accessible keyboard navigation */
+
+.header a:focus-visible,
+.menuToggle:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 5px;
+}
+
+/* ==========================================
+   HERO SECTION
+   ========================================== */
+
+.hero {
+  display: grid;
+  grid-template-columns: 51% 49%;
+  min-height: 690px;
+  background: #080808;
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 85px 8% 85px 12%;
+  background: linear-gradient(
+    110deg,
+    #050505 0%,
+    #111111 65%,
+    #242424 100%
+  );
+  color: #ffffff;
+}
+
+.heroEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 10px;
+  letter-spacing: 3px;
+  line-height: 1.8;
+  color: #dddddd;
+}
+
+.smallLine {
+  width: 30px;
+  height: 1px;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.hero h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(45px, 5vw, 82px);
+  font-weight: 400;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  margin: 30px 0;
+}
+
+.hero h1 em {
+  font-weight: 400;
+  font-style: italic;
+  color: #ffffff;
+}
+
+.heroContent > p {
+  max-width: 500px;
+  color: #d0d0d0;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.heroButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 35px;
+}
+
+.whiteButton,
+.blackButton,
+.outlineButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 17px 26px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.whiteButton {
+  background: #ffffff;
+  color: #000000 !important;
+}
+
+.whiteButton:hover {
+  background: #dddddd;
+  transform: translateY(-2px);
+}
+
+.outlineButton {
+  border: 1px solid #ffffff;
+  color: #ffffff !important;
+}
+
+.outlineButton:hover {
+  background: #ffffff;
+  color: #000000 !important;
+}
+
+.heroBottom {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 80px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #bbbbbb;
+}
+
+.heroBottomLine {
+  width: 40px;
+  height: 1px;
+  background: #888888;
+}
+
+.heroPhoto {
+  position: relative;
+  min-height: 690px;
+
+  background-image:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.35),
+      transparent 35%
+    ),
+    url("/images/paola-hero.jpeg");
+
+  background-size: cover;
+  background-position: center, center 20%;
+  background-repeat: no-repeat;
+  background-color: #e8e8e8;
+
+  filter: none;
+}
+
+.photoBadge {
+  position: absolute;
+  bottom: 35px;
+  left: 35px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.photoBadge span {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+}
+
+/* ==========================================
+   SERVICES AND PORTFOLIO SECTIONS
+   ========================================== */
+
+.servicesSection,
+.portfolioSection {
+  padding: 110px 6%;
+  background: #ffffff;
+}
+
+.sectionIntro {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 60px;
+}
+
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #777777;
+}
+
+.sectionIntro h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(38px, 4vw, 60px);
+  font-weight: 400;
+  letter-spacing: 2px;
+  margin: 20px 0;
+}
+
+.headingLine {
+  width: 75px;
+  height: 2px;
+  background: #000000;
+  margin: 20px auto;
+}
+
+.sectionIntro p {
+  color: #777777;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* ==========================================
+   SERVICE CARDS
+   ========================================== */
+
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  max-width: 1450px;
+  margin: 0 auto;
+}
+
+.serviceCard {
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  min-width: 0;
+  transition: transform 0.25s;
+}
+
+.serviceCard:hover {
+  transform: translateY(-5px);
+}
+
+.servicePhoto {
+  position: relative;
+  height: 310px;
+  overflow: hidden;
+  background: #eeeeee;
+}
+
+.servicePhoto img,
+.aboutPhoto img,
+.portfolioCard img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+  transition: transform 0.4s;
+}
+
+.serviceCard:hover img,
+.portfolioCard:hover img {
+  transform: scale(1.05);
+}
+
+.serviceNumber {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: #ffffff;
+  color: #000000;
+  padding: 10px 13px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.serviceDetails {
+  padding: 27px 22px 32px;
+}
+
+.serviceCategory {
+  display: block;
+  color: #777777;
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+}
+
+.serviceHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.serviceHeading h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 23px;
+  font-weight: 400;
+  margin: 0;
+}
+
+.serviceHeading strong {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.serviceDetails p {
+  min-height: 70px;
+  color: #777777;
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 20px 0;
+}
+
+.serviceAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #000000;
+  padding-bottom: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* ==========================================
+   ABOUT SECTION
+   ========================================== */
+
+.aboutSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #f3f3f3;
+  min-height: 650px;
+}
+
+.aboutPhoto {
+  min-height: 650px;
+  overflow: hidden;
+}
+
+.aboutPhoto img {
+  object-position: center 20%;
+}
+
+.aboutText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 80px 12%;
+}
+
+.aboutText h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(40px, 4vw, 65px);
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 25px 0;
+}
+
+.aboutText h2 em {
+  font-weight: 400;
+}
+
+.aboutLine {
+  width: 80px;
+  height: 2px;
+  background: #000000;
+  margin-bottom: 25px;
+}
+
+.aboutText p {
+  max-width: 500px;
+  color: #666666;
+  font-size: 14px;
+  line-height: 2;
+  margin-bottom: 15px;
+}
+
+.blackButton {
+  background: #000000;
+  color: #ffffff !important;
+  margin-top: 25px;
+}
+
+.blackButton:hover {
+  background: #444444;
+}
+
+/* ==========================================
+   PORTFOLIO GALLERY
+   ========================================== */
+
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  max-width: 1450px;
+  margin: 0 auto;
+}
+
+.portfolioCard {
+  position: relative;
+  height: 470px;
+  overflow: hidden;
+  background: #eeeeee;
+}
+
+.portfolioOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 65px 25px 28px;
+  background: linear-gradient(
+    transparent,
+    rgba(0, 0, 0, 0.8)
+  );
+  color: #ffffff;
+}
+
+.portfolioOverlay h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-weight: 400;
+  margin: 0 0 12px;
+}
+
+.portfolioOverlay span {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.portfolioNotice {
+  margin-top: 35px;
+  color: #888888;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* ==========================================
+   BOOKING CALL-TO-ACTION SECTION
+   ========================================== */
+
+.bookingSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: radial-gradient(
+    circle at center,
+    #303030 0%,
+    #080808 75%
+  );
+  color: #ffffff;
+  text-align: center;
+  padding: 120px 20px;
+}
+
+.bookingLabel {
+  color: #cccccc;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+.bookingSection h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(45px, 5vw, 78px);
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 30px 0;
+}
+
+.bookingSection h2 em {
+  font-weight: 400;
+}
+
+.bookingSection p {
+  max-width: 550px;
+  color: #cccccc;
+  font-size: 14px;
+  line-height: 1.9;
+  margin-bottom: 35px;
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  background: #000000;
+  color: #ffffff;
+  padding: 60px 6%;
+  border-top: 1px solid #333333;
+}
+
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.footerLogo {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 42px;
+  letter-spacing: 8px;
+}
+
+.footerBrand > span:last-child {
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.footerMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.footerMessage strong {
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.footerMessage span {
+  color: #aaaaaa;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.footerCopyright {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: #aaaaaa;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-align: right;
+}
+
+/* ==========================================
+   TABLET RESPONSIVENESS
+   ========================================== */
+
+@media (max-width: 1150px) {
+  .nav {
+    gap: 16px;
+  }
+
+  .serviceGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heroContent {
+    padding: 70px 8%;
+  }
+}
+
+/* ==========================================
+   MOBILE NAVIGATION AND LAYOUT
+   ========================================== */
+
+@media (max-width: 800px) {
+  .header {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 6%;
+    min-height: 88px;
+  }
+
+  .brand {
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .brandName {
+    font-size: 36px;
+    letter-spacing: 6px;
+  }
+
+  .brandSubtitle {
+    font-size: 8px;
+    letter-spacing: 1.4px;
+    margin-top: 6px;
+  }
+
+  .nav,
+  .headerButton {
+    display: none;
+  }
+
+  /* Hamburger menu button */
+
+  .menuToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 44px;
+    min-width: 90px;
+    padding: 10px 0 10px 12px;
+    border: 0;
+    background: transparent;
+    color: #ffffff;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .menuToggleText {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .menuIcon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    width: 24px;
+    height: 24px;
+  }
+
+  .menuIcon span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #ffffff;
+    transition: transform 0.2s ease;
+  }
+
+  .menuIconOpen span:first-child {
+    transform: translateY(4px) rotate(45deg);
+  }
+
+  .menuIconOpen span:last-child {
+    transform: translateY(-4px) rotate(-45deg);
+  }
+
+  /* Expanded mobile menu */
+
+  .mobileNav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px 6% 25px;
+    background: #080808;
+    border-top: 1px solid #333333;
+    border-bottom: 1px solid #333333;
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+  }
+
+  .mobileNavOpen {
+    display: flex;
+  }
+
+  .mobileNav > a:not(.mobileBookButton) {
+    display: flex;
+    align-items: center;
+    min-height: 54px;
+    padding: 15px 4px;
+    border-bottom: 1px solid #292929;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+  }
+
+  .mobileNav > a:hover {
+    color: #cccccc;
+  }
+
+  .mobileBookButton {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    min-height: 52px;
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: #ffffff;
+    color: #000000 !important;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+  }
+
+  .mobileBookButton:hover {
+    background: #dddddd;
+  }
+
+  /* Mobile hero and content */
+
+  .hero,
+  .aboutSection {
+    grid-template-columns: 1fr;
+  }
+
+  .heroContent {
+    padding: 80px 7%;
+  }
+
+  .hero h1 {
+    font-size: clamp(48px, 9vw, 75px);
+  }
+
+  .heroBottom {
+    margin-top: 50px;
+  }
+
+  .heroPhoto {
+    min-height: 550px;
+    background-position: center, center 18%;
+  }
+
+  .servicesSection,
+  .portfolioSection {
+    padding: 85px 5%;
+  }
+
+  .aboutPhoto {
+    min-height: 500px;
+    max-height: 600px;
+  }
+
+  .aboutText {
+    padding: 75px 7%;
+  }
+
+  .portfolioGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .portfolioCard {
+    height: 450px;
+  }
+
+  .footer {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footerCopyright {
+    text-align: center;
+  }
+}
+
+/* ==========================================
+   SMALL MOBILE SCREENS
+   ========================================== */
+
+@media (max-width: 500px) {
+  .topBar {
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .heroContent {
+    padding: 65px 6%;
+  }
+
+  .hero h1 {
+    font-size: clamp(40px, 10vw, 55px);
+  }
+
+  .heroButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .whiteButton,
+  .outlineButton {
+    width: 100%;
+  }
+
+  .heroPhoto {
+    min-height: 450px;
+    background-position: center, center 15%;
+  }
+
+  .serviceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .servicePhoto {
+    height: 350px;
+  }
+
+  .sectionIntro {
+    margin-bottom: 40px;
+  }
+
+  .sectionIntro h2 {
+    font-size: 38px;
+  }
+
+  .aboutPhoto {
+    min-height: 400px;
+  }
+
+  .portfolioCard {
+    height: 360px;
+  }
+
+  .bookingSection {
+    padding: 90px 6%;
+  }
+
+  .bookingSection h2 {
+    font-size: 43px;
+  }
+}
+
+/* ==========================================
+   EXTRA SMALL PHONES
+   ========================================== */
+
+@media (max-width: 380px) {
+  .header {
+    padding: 16px 5%;
+  }
+
+  .brandName {
+    font-size: 31px;
+    letter-spacing: 5px;
+  }
+
+  .brandSubtitle {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+
+  .menuToggle {
+    gap: 8px;
+    min-width: 80px;
+  }
+
+  .menuToggleText {
+    font-size: 10px;
+  }
+}
+
+/* ==========================================
+   REDUCED MOTION ACCESSIBILITY
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .menuIcon span {
+    transition: none;
+  }
+}

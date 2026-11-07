@@ -1,0 +1,474 @@
+
+/* ==========================================
+   PAOLA MAKEUP & HAIR STYLES
+   PORTFOLIO ADMIN
+   PHASE 7B-06 — MOBILE OPTIMIZATION
+   ========================================== */
+
+.page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  color: #111;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.page * {
+  box-sizing: border-box;
+}
+
+.page a {
+  text-decoration: none;
+}
+
+.loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #111;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+/* HEADER */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 25px;
+  padding: 25px 5%;
+  background: #080808;
+  color: #fff;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+  color: #fff;
+  font-family: Georgia, serif;
+  font-size: 35px;
+  letter-spacing: 6px;
+}
+
+.brand span {
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+.headerNav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+
+.headerNav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.headerNav a:hover {
+  opacity: 0.7;
+}
+
+/* MAIN CONTENT */
+
+.container {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 55px 5% 90px;
+}
+
+.eyebrow {
+  color: #777;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+
+.pageTitle {
+  margin: 15px 0;
+  font-family: Georgia, serif;
+  font-size: clamp(36px, 5vw, 55px);
+  font-weight: 400;
+}
+
+.intro {
+  max-width: 650px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* MESSAGES */
+
+.error,
+.message {
+  padding: 18px;
+  margin: 25px 0;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  background: #ffecec;
+  border: 1px solid #ce8989;
+  color: #8b2222;
+}
+
+.message {
+  background: #e9f5eb;
+  border: 1px solid #9fc9aa;
+  color: #225e35;
+}
+
+/* UPLOAD SECTION */
+
+.uploadPanel {
+  margin: 35px 0;
+  padding: 35px;
+  background: #fff;
+  border: 1px solid #ddd;
+}
+
+.sectionTitle {
+  margin: 0 0 25px;
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.uploadForm {
+  display: grid;
+  gap: 20px;
+  max-width: 650px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.field span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.field input,
+.field select,
+.field textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.field input[type="file"] {
+  max-width: 100%;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.primaryButton,
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 14px 20px;
+  border: 1px solid #111;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  background: #111;
+  color: #fff;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: #333;
+}
+
+.deleteButton {
+  background: #fff;
+  color: #111;
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: #f1f1f1;
+}
+
+.primaryButton:disabled,
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* PORTFOLIO GALLERY */
+
+.galleryHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin: 40px 0 25px;
+}
+
+.galleryHeading h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 32px;
+  font-weight: 400;
+}
+
+.emptyState {
+  padding: 35px 20px;
+  border: 1px dashed #ccc;
+  color: #777;
+  font-size: 14px;
+  text-align: center;
+}
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.photoCard {
+  min-width: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #ddd;
+}
+
+.photoImage {
+  display: block;
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+
+.photoContent {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 20px;
+}
+
+.photoTitle {
+  font-family: Georgia, serif;
+  font-size: 21px;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.photoCategory {
+  color: #777;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.checkField {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.checkField input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  accent-color: #111;
+}
+
+.orderField {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.orderField input {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.deleteButton {
+  width: 100%;
+}
+
+/* ACCESSIBILITY */
+
+.page button:focus-visible,
+.page input:focus-visible,
+.page select:focus-visible,
+.page textarea:focus-visible,
+.page a:focus-visible {
+  outline: 2px solid #555;
+  outline-offset: 3px;
+}
+
+/* TABLET */
+
+@media (max-width: 1000px) {
+  .galleryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .header {
+    flex-wrap: wrap;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 650px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 22px 5%;
+  }
+
+  .brand {
+    font-size: 32px;
+    letter-spacing: 5px;
+  }
+
+  .headerNav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #333;
+  }
+
+  .headerNav a {
+    min-height: 44px;
+    font-size: 10px;
+  }
+
+  .container {
+    padding: 35px 15px 70px;
+  }
+
+  .pageTitle {
+    font-size: clamp(32px, 8vw, 42px);
+    line-height: 1.2;
+  }
+
+  .uploadPanel {
+    padding: 22px 18px;
+    margin: 25px 0;
+  }
+
+  .sectionTitle {
+    font-size: 27px;
+  }
+
+  .uploadForm {
+    gap: 18px;
+  }
+
+  .primaryButton {
+    width: 100%;
+    min-height: 54px;
+  }
+
+  .galleryHeading {
+    margin-top: 30px;
+  }
+
+  .galleryHeading h2 {
+    font-size: 27px;
+  }
+
+  .galleryGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .photoImage {
+    height: 280px;
+  }
+
+  .photoContent {
+    padding: 20px 18px;
+  }
+
+  .deleteButton {
+    min-height: 52px;
+  }
+}
+
+/* SMALL PHONES */
+
+@media (max-width: 380px) {
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .uploadPanel {
+    padding: 18px 12px;
+  }
+
+  .photoImage {
+    height: 230px;
+  }
+
+  .photoContent {
+    padding: 18px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page *,
+  .page *::before,
+  .page *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

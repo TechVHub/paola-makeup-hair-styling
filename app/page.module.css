@@ -991,3 +991,27 @@
     transition: none;
   }
 }
+
+/* Original Paola logo - desktop and mobile */
+.brandLogo {
+  display: block;
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 800px) {
+  .brandLogo {
+    width: 66px;
+    height: 66px;
+  }
+}
+
+@media (max-width: 380px) {
+  .brandLogo {
+    width: 56px;
+    height: 56px;
+  }
+}

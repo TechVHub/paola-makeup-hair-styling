@@ -1,4 +1,4 @@
-
+﻿
 "use client";
 
 import { useEffect, useState } from "react";
@@ -162,9 +162,9 @@ export default function HomePage() {
   return (
     <main className={styles.site}>
       <div className={styles.topBar}>
-        MAKEUP <span>✦</span> HAIR STYLING
-        <span>✦</span> BRIDAL BEAUTY
-        <span>✦</span> SPECIAL EVENTS
+        MAKEUP <span>{"\u2726"}</span> HAIR STYLING
+        <span>{"\u2726"}</span> BRIDAL BEAUTY
+        <span>{"\u2726"}</span> SPECIAL EVENTS
       </div>
 
       <header className={styles.header}>
@@ -173,10 +173,13 @@ export default function HomePage() {
           className={styles.brand}
           onClick={closeMenu}
         >
-          <span className={styles.brandName}>PAOLA</span>
-          <span className={styles.brandSubtitle}>
-            MAKEUP & HAIR STYLES
-          </span>
+          <img
+            src="/images/paola-logo.png"
+            alt="Paola Makeup & Hair Styles"
+            className={styles.brandLogo}
+            width={100}
+            height={100}
+          />
         </Link>
 
         <nav
@@ -194,7 +197,7 @@ export default function HomePage() {
           href="/book"
           className={styles.headerButton}
         >
-          BOOK NOW <span>↗</span>
+          BOOK NOW <span>{"\u2197"}</span>
         </Link>
 
         <button
@@ -248,7 +251,7 @@ export default function HomePage() {
             className={styles.mobileBookButton}
             onClick={closeMenu}
           >
-            BOOK AN APPOINTMENT <span>↗</span>
+            BOOK AN APPOINTMENT <span>{"\u2197"}</span>
           </Link>
         </nav>
       </header>
@@ -279,7 +282,7 @@ export default function HomePage() {
               href="/book"
               className={styles.whiteButton}
             >
-              BOOK AN APPOINTMENT <span>↗</span>
+              BOOK AN APPOINTMENT <span>{"\u2197"}</span>
             </Link>
 
             <a
@@ -390,7 +393,7 @@ export default function HomePage() {
                   )}`}
                   className={styles.serviceAction}
                 >
-                  BOOK THIS SERVICE <span>↗</span>
+                  BOOK THIS SERVICE <span>{"\u2197"}</span>
                 </Link>
               </div>
             </article>
@@ -439,7 +442,7 @@ export default function HomePage() {
             href="/book"
             className={styles.blackButton}
           >
-            BOOK WITH PAOLA <span>↗</span>
+            BOOK WITH PAOLA <span>{"\u2197"}</span>
           </Link>
         </div>
       </section>
@@ -527,7 +530,7 @@ export default function HomePage() {
           href="/book"
           className={styles.whiteButton}
         >
-          BOOK YOUR APPOINTMENT <span>↗</span>
+          BOOK YOUR APPOINTMENT <span>{"\u2197"}</span>
         </Link>
       </section>
 
@@ -541,12 +544,12 @@ export default function HomePage() {
 
         <div className={styles.footerMessage}>
           <strong>YOUR BEAUTY IS OUR PASSION</strong>
-          <span>MAKEUP • HAIR • BRIDAL • EVENTS</span>
+          <span>MAKEUP {"\u2022"} HAIR {"\u2022"} BRIDAL {"\u2022"} EVENTS</span>
         </div>
 
         <div className={styles.footerCopyright}>
           <span>
-            © {new Date().getFullYear()} PAOLA
+            {"\u00A9"} {new Date().getFullYear()} PAOLA
           </span>
           <span>ALL RIGHTS RESERVED</span>
         </div>
@@ -554,3 +557,6 @@ export default function HomePage() {
     </main>
   );
 }
+
+
+

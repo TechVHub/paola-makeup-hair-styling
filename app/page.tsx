@@ -1,10 +1,11 @@
-﻿
+
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getSupabase } from "../lib/supabase";
 import styles from "./page.module.css";
+import ImmersiveMotion from "./ImmersiveMotion";
 
 type Service = {
   id: string;
@@ -88,37 +89,30 @@ export default function HomePage() {
 
     async function loadContent() {
       try {
-        const supabase = getSupabase();
-
-        const [serviceResult, photoResult] =
+        const [serviceResponse, photoResponse] =
           await Promise.all([
-            supabase
-              .from("services")
-              .select(
-                "id,name,category,description,price,price_is_starting_at,duration_minutes,image_path"
-              )
-              .eq("is_active", true)
-              .order("sort_order"),
-            supabase
-              .from("portfolio_photos")
-              .select("id,title,category,image_path")
-              .eq("is_featured", true)
-              .order("sort_order")
-              .limit(12),
+            fetch("/api/services", { cache: "no-store" }),
+            fetch("/api/featured-portfolio", { cache: "no-store" }),
           ]);
 
-        if (serviceResult.error) {
-          throw serviceResult.error;
+        if (!serviceResponse.ok) {
+          throw new Error("Unable to load services.");
         }
 
-        if (photoResult.error) {
-          throw photoResult.error;
+        if (!photoResponse.ok) {
+          throw new Error("Unable to load portfolio.");
         }
+
+        const serviceResult: { services: Service[] } =
+          await serviceResponse.json();
+
+        const photoResult: { photos: PortfolioPhoto[] } =
+          await photoResponse.json();
 
         if (!active) return;
 
-        setServices(serviceResult.data ?? []);
-        setPhotos(photoResult.data ?? []);
+        setServices(serviceResult.services ?? []);
+        setPhotos(photoResult.photos ?? []);
       } catch (err) {
         if (active) {
           setError(
@@ -161,6 +155,7 @@ export default function HomePage() {
 
   return (
     <main className={styles.site}>
+      <ImmersiveMotion />
       <div className={styles.topBar}>
         MAKEUP <span>{"\u2726"}</span> HAIR STYLING
         <span>{"\u2726"}</span> BRIDAL BEAUTY
@@ -361,15 +356,23 @@ export default function HomePage() {
               className={styles.serviceCard}
             >
               <div className={styles.servicePhoto}>
+              <Link
+                href={`/portfolio/${encodeURIComponent(service.category)}`}
+                className={styles.servicePhotoLink}
+                aria-label={`View ${service.category.replaceAll("_", " ")} gallery`}
+              >
                 <img
                   src={serviceImage(service)}
                   alt={service.name}
                   loading="lazy"
                 />
-
                 <span className={styles.serviceNumber}>
                   {String(index + 1).padStart(2, "0")}
                 </span>
+                <span className={styles.serviceViewGallery}>
+                  VIEW GALLERY {"\u2197"}
+                </span>
+              </Link>
               </div>
 
               <div className={styles.serviceDetails}>
@@ -482,27 +485,47 @@ export default function HomePage() {
           </p>
         )}
 
+                {/* PHASE 1B: CATEGORY GALLERIES */}
+        <div className={styles.portfolioCategories}>
+          {[
+            ["makeup", "MAKEUP"],
+            ["hair", "HAIR STYLING"],
+            ["bridal", "BRIDAL"],
+            ["special_event", "SPECIAL EVENTS"],
+            ["other", "OTHER"],
+          ].map(([slug, label]) => (
+            <Link
+              key={slug}
+              href={`/portfolio/${slug}`}
+              className={styles.portfolioCategoryLink}
+            >
+              {label} <span>{"\u2197"}</span>
+            </Link>
+          ))}
+        </div>
         <div className={styles.portfolioGrid}>
           {photos.map((photo) => (
-            <div
+            <Link
               key={photo.id}
+              href={`/portfolio/${encodeURIComponent(photo.category)}`}
               className={styles.portfolioCard}
+              aria-label={`View ${photo.title} in the ${photo.category.replaceAll("_", " ")} gallery`}
             >
               <img
                 src={portfolioImage(photo.image_path)}
                 alt={photo.title}
                 loading="lazy"
               />
-
               <div className={styles.portfolioOverlay}>
                 <h3>{photo.title}</h3>
                 <span>
-                  {photo.category
-                    .replaceAll("_", " ")
-                    .toUpperCase()}
+                  {photo.category.replaceAll("_", " ").toUpperCase()}
+                </span>
+                <span className={styles.portfolioExplore}>
+                  EXPLORE GALLERY {"\u2197"}
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -557,6 +580,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-
-

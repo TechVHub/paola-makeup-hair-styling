@@ -84,31 +84,34 @@ export default function AdminDashboardPage() {
     try {
       const supabase = getSupabase();
 
-      const { data, error: queryError } = await supabase
-        .from("bookings")
-        .select(`
-          id,
-          customer_name,
-          customer_email,
-          customer_phone,
-          customer_notes,
-          starts_at,
-          ends_at,
-          quoted_price,
-          status,
-          created_at,
-          services (
-            name,
-            duration_minutes
-          )
-        `)
-        .order("starts_at", { ascending: true });
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      if (queryError) throw queryError;
+      if (sessionError || !session?.access_token) {
+        throw new Error("Your session has expired. Please sign in again.");
+      }
 
-      setBookings(
-        (data ?? []) as unknown as Booking[]
-      );
+      const response = await fetch("/api/admin/bookings", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        cache: "no-store",
+      });
+
+      const result = (await response.json()) as {
+        success?: boolean;
+        bookings?: Booking[];
+        error?: string;
+      };
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error ?? "Unable to load appointments.");
+      }
+
+      setBookings(result.bookings ?? []);
     } catch (err) {
       setError(
         err instanceof Error
@@ -298,6 +301,12 @@ export default function AdminDashboardPage() {
         </Link>
 
         <div className={styles.headerActions}>
+          <Link
+            href="/admin"
+            className={styles.siteLink}
+          >
+            ← ADMIN PORTAL
+          </Link>
           <span>{adminEmail}</span>
 
           <Link

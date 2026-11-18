@@ -27,6 +27,44 @@ type AvailableSlot = {
   starts_at: string;
 };
 
+async function getD1AvailableSlots(
+  serviceId: string,
+  date: string
+): Promise<{
+  data: AvailableSlot[] | null;
+  error: Error | null;
+}> {
+  try {
+    const response = await fetch(
+      `/api/availability?serviceId=${encodeURIComponent(serviceId)}&date=${encodeURIComponent(date)}`,
+      { cache: "no-store" }
+    );
+
+    const result = (await response.json()) as {
+      slots?: AvailableSlot[];
+      error?: string;
+    };
+
+    if (!response.ok) {
+      throw new Error(
+        result.error ?? "Unable to load available appointments."
+      );
+    }
+
+    return {
+      data: result.slots ?? [],
+      error: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error:
+        error instanceof Error
+          ? error
+          : new Error("Unable to load available appointments."),
+    };
+  }
+}
 type BookingSuccess = {
   bookingId: string;
   serviceName: string;
@@ -90,6 +128,22 @@ function BookingContent() {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState("");
 
+  const [closingConfirmation, setClosingConfirmation] = useState(false);
+  const [leavingPage, setLeavingPage] = useState(false);
+
+  function finishConfirmation() {
+    if (closingConfirmation || leavingPage) return;
+
+    setClosingConfirmation(true);
+
+    window.setTimeout(() => {
+      setLeavingPage(true);
+
+      window.setTimeout(() => {
+        window.location.assign("/");
+      }, 450);
+    }, 400);
+  }
   const [success, setSuccess] =
     useState<BookingSuccess | null>(null);
 
@@ -116,20 +170,25 @@ function BookingContent() {
 
     async function loadServices() {
       try {
-        const { data, error: queryError } =
-          await getSupabase()
-            .from("services")
-            .select(
-              "id,name,category,description,price,price_is_starting_at,duration_minutes"
-            )
-            .eq("is_active", true)
-            .order("sort_order");
+        const response = await fetch("/api/services", {
+          cache: "no-store",
+        });
 
-        if (queryError) throw queryError;
+        const result = (await response.json()) as {
+          services?: Service[];
+          error?: string;
+        };
+
+        if (!response.ok) {
+          throw new Error(
+            result.error ?? "Unable to load services."
+          );
+        }
 
         if (!active) return;
 
-        const availableServices: Service[] = data ?? [];
+        const availableServices: Service[] =
+          result.services ?? [];
         setServices(availableServices);
 
         const requested = availableServices.find(
@@ -180,13 +239,7 @@ function BookingContent() {
 
       try {
         const { data, error: queryError } =
-          await getSupabase().rpc(
-            "get_available_slots",
-            {
-              p_service_id: serviceId,
-              p_date: date,
-            }
-          );
+          await getD1AvailableSlots(serviceId, date);
 
         if (queryError) throw queryError;
 
@@ -293,13 +346,7 @@ function BookingContent() {
 
       // Refresh availability after an unsuccessful attempt.
       if (serviceId && date) {
-        const { data } = await getSupabase().rpc(
-          "get_available_slots",
-          {
-            p_service_id: serviceId,
-            p_date: date,
-          }
-        );
+        const { data } = await getD1AvailableSlots(serviceId, date);
 
         setSlots((data ?? []) as AvailableSlot[]);
         setSelectedSlot("");
@@ -310,70 +357,11 @@ function BookingContent() {
   }
 
   // ----------------------------------------------------------
-  // SUCCESS PAGE
-  // ----------------------------------------------------------
-
-  if (success) {
-    return (
-      <main className={styles.page}>
-        <div className={styles.container}>
-          <div className={styles.successCard}>
-            <span className={styles.eyebrow}>
-              APPOINTMENT REQUEST RECEIVED
-            </span>
-
-            <h1>Thank You!</h1>
-
-            <p>
-              Your appointment request has been received
-              successfully. Paola will review your request
-              and confirm availability.
-            </p>
-
-            <div className={styles.successDetails}>
-              <p>
-                <strong>Service:</strong>{" "}
-                {success.serviceName}
-              </p>
-
-              <p>
-                <strong>Date &amp; Time:</strong>{" "}
-                {formatAppointment(success.startsAt)}
-              </p>
-
-              <p>
-                <strong>Email:</strong>{" "}
-                {success.customerEmail}
-              </p>
-
-              <p>
-                <strong>Status:</strong> Pending confirmation
-              </p>
-            </div>
-
-            <p className={styles.note}>
-              Please note: Your appointment is not confirmed
-              until Paola approves it.
-            </p>
-
-            <Link
-              href="/"
-              className={styles.primaryButton}
-            >
-              RETURN TO HOMEPAGE
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  // ----------------------------------------------------------
   // BOOKING FORM
   // ----------------------------------------------------------
 
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${leavingPage ? styles.paolaPageLeaving : ""}`}>
       <header className={styles.header}>
         <Link href="/" className={styles.brand}>
           PAOLA
@@ -381,7 +369,7 @@ function BookingContent() {
         </Link>
 
         <Link href="/" className={styles.backLink}>
-          ← BACK TO WEBSITE
+          BACK TO WEBSITE
         </Link>
       </header>
 
@@ -433,7 +421,7 @@ function BookingContent() {
                       key={service.id}
                       value={service.id}
                     >
-                      {service.name} — {formatPrice(service)}
+                      {service.name} {" - "} {formatPrice(service)}
                     </option>
                   ))}
                 </select>
@@ -626,7 +614,7 @@ function BookingContent() {
               >
                 {submitting
                   ? "SUBMITTING REQUEST..."
-                  : "REQUEST APPOINTMENT →"}
+                  : "REQUEST APPOINTMENT"}
               </button>
 
               <p className={styles.note}>
@@ -659,7 +647,7 @@ function BookingContent() {
               <strong>
                 {selectedService
                   ? formatPrice(selectedService)
-                  : "—"}
+                  : "-"}
               </strong>
             </div>
 
@@ -669,7 +657,7 @@ function BookingContent() {
               <strong>
                 {selectedService
                   ? `${selectedService.duration_minutes} minutes`
-                  : "—"}
+                  : "-"}
               </strong>
             </div>
 
@@ -696,6 +684,96 @@ function BookingContent() {
           </aside>
         </div>
       </div>
+      {success && (
+        <div
+          className={`${styles.paolaConfirmationOverlay} ${
+            closingConfirmation ? styles.paolaConfirmationClosing : ""
+          }`}
+          role="presentation"
+        >
+          <section
+            className={styles.paolaConfirmationModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="paola-confirmation-title"
+            aria-describedby="paola-confirmation-description"
+          >
+            <div className={styles.paolaConfirmationCheck} aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none">
+                <circle
+                  cx="32"
+                  cy="32"
+                  r="29"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className={styles.paolaConfirmationCircle}
+                />
+                <path
+                  d="M18 33 L28 43 L47 22"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={styles.paolaConfirmationTick}
+                />
+              </svg>
+            </div>
+
+            <span className={styles.paolaConfirmationEyebrow}>
+              PAOLA MAKEUP &amp; HAIR STYLES
+            </span>
+
+            <h2 id="paola-confirmation-title">
+              Your Request Is In!
+            </h2>
+
+            <p
+              id="paola-confirmation-description"
+              className={styles.paolaConfirmationIntro}
+            >
+              Your beauty appointment request has been received.
+              We can't wait to glam you up!
+            </p>
+
+            <div className={styles.paolaConfirmationDetails}>
+              <div>
+                <span>SERVICE</span>
+                <strong>{success.serviceName}</strong>
+              </div>
+
+              <div>
+                <span>DATE &amp; TIME</span>
+                <strong>{formatAppointment(success.startsAt)}</strong>
+              </div>
+
+              <div>
+                <span>EMAIL</span>
+                <strong>{success.customerEmail}</strong>
+              </div>
+
+              <div>
+                <span>STATUS</span>
+                <strong>Pending Paola's Approval</strong>
+              </div>
+            </div>
+
+            <p className={styles.paolaConfirmationNote}>
+              Please check your email for your request details.
+              Your appointment is not confirmed until Paola approves it.
+            </p>
+
+            <button
+              type="button"
+              className={styles.paolaConfirmationDone}
+              onClick={finishConfirmation}
+              disabled={closingConfirmation || leavingPage}
+              autoFocus
+            >
+              DONE
+            </button>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

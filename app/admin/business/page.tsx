@@ -194,36 +194,39 @@ export default function BusinessManagementPage() {
   const loadData = useCallback(async () => {
     const supabase = getSupabase();
 
-    const [s, h, b, cfg] = await Promise.all([
-      supabase
-        .from("services")
-        .select("*")
-        .order("sort_order"),
-      supabase
-        .from("business_hours")
-        .select("*")
-        .order("day_of_week"),
-      supabase
-        .from("availability_blocks")
-        .select("*")
-        .order("starts_at"),
-      supabase
-        .from("business_settings")
-        .select(
-          "id,booking_enabled,minimum_notice_hours,booking_window_days"
-        )
-        .eq("id", 1)
-        .single(),
-    ]);
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
-    for (const result of [s, h, b, cfg]) {
-      if (result.error) throw result.error;
+    if (sessionError || !session?.access_token) {
+      throw new Error("Your session has expired. Sign in again.");
     }
 
-    setServices((s.data ?? []) as Service[]);
-    setHours((h.data ?? []) as BusinessHour[]);
-    setBlocks((b.data ?? []) as TimeBlock[]);
-    setSettings(cfg.data as Settings);
+    const response = await fetch("/api/admin/business", {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      cache: "no-store",
+    });
+
+    const data = (await response.json()) as {
+      success?: boolean;
+      error?: string;
+      services?: Service[];
+      hours?: BusinessHour[];
+      blocks?: TimeBlock[];
+      settings?: Settings | null;
+    };
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.error ?? "Unable to load business data.");
+    }
+
+    setServices(data.services ?? []);
+    setHours(data.hours ?? []);
+    setBlocks(data.blocks ?? []);
+    setSettings(data.settings ?? null);
   }, []);
 
   useEffect(() => {
@@ -269,6 +272,38 @@ export default function BusinessManagementPage() {
     initialize();
     return () => { active = false; };
   }, [router, loadData]);
+
+  async function businessAction(
+    action: string,
+    payload: Record<string, unknown>
+  ) {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await getSupabase().auth.getSession();
+
+    if (sessionError || !session?.access_token) {
+      throw new Error("Your session has expired. Sign in again.");
+    }
+
+    const response = await fetch("/api/admin/business", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ action, ...payload }),
+    });
+
+    const result = (await response.json()) as {
+      success?: boolean;
+      error?: string;
+    };
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error ?? "Unable to save changes.");
+    }
+  }
 
   function clearFeedback() {
     setError("");
@@ -402,7 +437,6 @@ export default function BusinessManagementPage() {
     }
 
     await runAction(async () => {
-      const supabase = getSupabase();
       let newPath: string | null = null;
 
       try {
@@ -410,49 +444,25 @@ export default function BusinessManagementPage() {
           newPath = await uploadPhoto(selectedPhoto);
         }
 
-        const payload = {
-          name: form.name.trim(),
-          category: form.category,
-          description: form.description.trim() || null,
-          price,
-          price_is_starting_at: form.price_is_starting_at,
-          duration_minutes: duration,
-          is_active: form.is_active,
-          sort_order: order,
-          ...(newPath ? { image_path: newPath } : {}),
-        };
+        await businessAction("saveService", {
+          id: editingId,
+          service: {
+            name: form.name.trim(),
+            category: form.category,
+            description: form.description.trim() || null,
+            price,
+            price_is_starting_at: form.price_is_starting_at,
+            duration_minutes: duration,
+            is_active: form.is_active,
+            sort_order: order,
+            image_path: newPath,
+          },
+        });
 
-        if (editingId) {
-          const { data, error: updateError } =
-            await supabase
-              .from("services")
-              .update(payload)
-              .eq("id", editingId)
-              .select("id");
-
-          if (updateError) throw updateError;
-          if (!data?.length) {
-            throw new Error("Service update was not saved.");
-          }
-        } else {
-          const { data, error: insertError } =
-            await supabase
-              .from("services")
-              .insert(payload)
-              .select("id");
-
-          if (insertError) throw insertError;
-          if (!data?.length) {
-            throw new Error("Service was not created.");
-          }
-        }
-
-        // Keep old files for now rather than risk deleting
-        // an image referenced by another record.
         resetService();
       } catch (err) {
         if (newPath) {
-          await supabase.storage
+          await getSupabase().storage
             .from(BUCKET)
             .remove([newPath]);
         }
@@ -463,20 +473,12 @@ export default function BusinessManagementPage() {
 
   async function toggleService(service: Service) {
     await runAction(async () => {
-      const { data, error: updateError } =
-        await getSupabase()
-          .from("services")
-          .update({ is_active: !service.is_active })
-          .eq("id", service.id)
-          .select("id");
-
-      if (updateError) throw updateError;
-      if (!data?.length) {
-        throw new Error("Service was not updated.");
-      }
+      await businessAction("toggleService", {
+        id: service.id,
+        is_active: !service.is_active,
+      });
     }, "Service availability updated.");
   }
-
   function updateHour(
     day: number,
     field: "is_open" | "open_time" | "close_time",
@@ -499,31 +501,21 @@ export default function BusinessManagementPage() {
           hour.close_time <= hour.open_time
       )
     ) {
-      setError(
-        "Closing time must be later than opening time."
-      );
+      setError("Closing time must be later than opening time.");
       return;
     }
 
     await runAction(async () => {
-      const payload = hours.map((hour) => ({
-        day_of_week: hour.day_of_week,
-        is_open: hour.is_open,
-        open_time: hour.open_time,
-        close_time: hour.close_time,
-      }));
-
-      const { error: updateError } =
-        await getSupabase()
-          .from("business_hours")
-          .upsert(payload, {
-            onConflict: "day_of_week",
-          });
-
-      if (updateError) throw updateError;
+      await businessAction("saveHours", {
+        hours: hours.map((hour) => ({
+          day_of_week: hour.day_of_week,
+          is_open: hour.is_open,
+          open_time: hour.open_time,
+          close_time: hour.close_time,
+        })),
+      });
     }, "Business hours saved.");
   }
-
   async function addBlock(
     event: React.FormEvent<HTMLFormElement>
   ) {
@@ -548,41 +540,28 @@ export default function BusinessManagementPage() {
     }
 
     await runAction(async () => {
-      const { error: insertError } =
-        await getSupabase()
-          .from("availability_blocks")
-          .insert({
-            starts_at: start,
-            ends_at: end,
-            reason: blockReason.trim() || null,
-          });
-
-      if (insertError) throw insertError;
+      await businessAction("addBlock", {
+        starts_at: start,
+        ends_at: end,
+        reason: blockReason.trim() || null,
+      });
 
       setBlockStart("");
       setBlockEnd("");
       setBlockReason("");
     }, "Unavailable time added.");
   }
-
   async function removeBlock(block: TimeBlock) {
-    if (
-      !window.confirm(
-        "Remove this unavailable period?"
-      )
-    ) return;
+    if (!window.confirm("Remove this unavailable period?")) {
+      return;
+    }
 
     await runAction(async () => {
-      const { error: deleteError } =
-        await getSupabase()
-          .from("availability_blocks")
-          .delete()
-          .eq("id", block.id);
-
-      if (deleteError) throw deleteError;
+      await businessAction("removeBlock", {
+        id: block.id,
+      });
     }, "Unavailable period removed.");
   }
-
   async function saveSettings() {
     if (!settings) return;
 
@@ -598,22 +577,13 @@ export default function BusinessManagementPage() {
     }
 
     await runAction(async () => {
-      const { error: updateError } =
-        await getSupabase()
-          .from("business_settings")
-          .update({
-            booking_enabled: settings.booking_enabled,
-            minimum_notice_hours:
-              settings.minimum_notice_hours,
-            booking_window_days:
-              settings.booking_window_days,
-          })
-          .eq("id", 1);
-
-      if (updateError) throw updateError;
+      await businessAction("saveSettings", {
+        booking_enabled: settings.booking_enabled,
+        minimum_notice_hours: settings.minimum_notice_hours,
+        booking_window_days: settings.booking_window_days,
+      });
     }, "Booking settings saved.");
   }
-
   if (checking || !authorized) {
     return (
       <main className={styles.loading}>

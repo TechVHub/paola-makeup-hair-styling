@@ -1,3 +1,4 @@
+import { getD1 } from "@/lib/d1";
 
 import { env } from "cloudflare:workers";
 import { createClient } from "@supabase/supabase-js";
@@ -326,62 +327,78 @@ export async function POST(request: Request) {
       );
     }
 
-    // Server-only client for the authorized update.
-    const adminClient = createClient(
-      supabaseUrl,
-      serviceKey,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      }
-    );
+    // The Supabase admin identity has already been verified.
+    // Perform a conditional update in local D1.
 
-    // Conditional update prevents stale dashboard actions.
-    const { data: updated, error: updateError } =
-      await adminClient
-        .from("bookings")
-        .update({
-          status: status as BookingStatus,
-        })
-        .eq("id", bookingId)
-        .eq("status", expectedStatus)
-        .select(`
-          id,
-          customer_name,
-          customer_email,
-          starts_at,
-          status,
-          services(name)
-        `);
+    const db = getD1();
 
-    if (updateError) {
+    // Update only when the appointment is in the expected state.
+    // RETURNING identifies the row actually updated.
+    let updated: { id: string; status: string } | null = null;
+
+    try {
+      const result = await db.prepare(`
+        UPDATE bookings
+        SET status = ?
+        WHERE id = ?
+          AND status = ?
+        RETURNING id, status
+      `)
+        .bind(status, bookingId, expectedStatus)
+        .all<{ id: string; status: string }>();
+
+      updated = result.results.length === 1 ? result.results[0] : null;
+    } catch (error) {
       console.error(
-        "Appointment status update failed:",
-        updateError.code
+        "D1 appointment status update failed:",
+        error instanceof Error ? error.message : "Unknown error"
       );
 
       return json(
+        { error: "Unable to update appointment. Please try again." },
+        500
+      );
+    }
+
+    if (!updated) {
+      return json(
         {
-          error:
-            "Unable to update appointment. Please refresh and try again.",
+          error: "This appointment has changed. Refresh and try again.",
         },
         409
       );
     }
+    const booking = await db.prepare(`
+      SELECT
+        b.customer_name,
+        b.customer_email,
+        b.starts_at,
+        s.name AS service_name
+      FROM bookings b
+      LEFT JOIN services s ON s.id = b.service_id
+      WHERE b.id = ?
+    `)
+      .bind(bookingId)
+      .first<{
+        customer_name: string;
+        customer_email: string;
+        starts_at: string;
+        service_name: string | null;
+      }>();
 
-    if (!updated || updated.length !== 1) {
+    if (!booking) {
       return json(
         {
-          error:
-            "This appointment has changed. Refresh and try again.",
+          success: true,
+          status,
+          emailSent: false,
+          emailRequired: status !== "completed",
+          message:
+            "Appointment updated, but notification details could not be loaded.",
         },
-        409
+        200
       );
     }
-
-    const booking = updated[0];
 
     // Completed appointments do not require an email.
     if (status === "completed") {
@@ -398,14 +415,7 @@ export async function POST(request: Request) {
     }
 
     // Confirmed, declined, and cancelled send emails.
-    const service = booking.services as unknown as
-      | { name: string }
-      | { name: string }[]
-      | null;
-
-    const serviceName = Array.isArray(service)
-      ? service[0]?.name ?? "Beauty Appointment"
-      : service?.name ?? "Beauty Appointment";
+    const serviceName = booking.service_name ?? "Beauty Appointment";
 
     const emailSent = await sendStatusEmail(
       booking.customer_email,

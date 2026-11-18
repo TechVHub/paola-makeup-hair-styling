@@ -1,0 +1,19 @@
+{
+    "$schema":  "node_modules/wrangler/config-schema.json",
+    "name":  "paola-makeup-hair-styling",
+    "main":  ".cloudflare/output/v0/workers/default/bundle/index.js",
+    "compatibility_date":  "2026-11-05",
+    "compatibility_flags":  [
+                                "nodejs_compat"
+                            ],
+    "d1_databases":  [
+                         {
+                             "binding":  "DB",
+                             "database_name":  "paola-makeup-production",
+                             "database_id":  "487d7773-0d6e-4dfe-83b5-3e8000d105ce"
+                         }
+                     ],
+    "images":  {
+                   "binding":  "IMAGES"
+               }
+}

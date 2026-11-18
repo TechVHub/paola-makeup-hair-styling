@@ -630,3 +630,221 @@
     animation: none !important;
   }
 }
+
+
+/* -------------------------------------------------------
+   PAOLA BOOKING CONFIRMATION POPUP
+   ------------------------------------------------------- */
+
+.paolaConfirmationOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.66);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  animation: paolaOverlayIn 400ms ease both;
+}
+
+.paolaConfirmationModal {
+  width: min(100%, 470px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #fff;
+  color: #111;
+  border-radius: 18px;
+  padding: 38px 34px 32px;
+  text-align: center;
+  box-shadow: 0 25px 90px rgba(0, 0, 0, 0.3);
+  animation: paolaModalIn 500ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.paolaConfirmationCheck {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 22px;
+  color: #111;
+}
+
+.paolaConfirmationCheck svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.paolaConfirmationCircle {
+  stroke-dasharray: 183;
+  stroke-dashoffset: 183;
+  animation: paolaDrawCheck 700ms 180ms ease forwards;
+}
+
+.paolaConfirmationTick {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: paolaDrawCheck 420ms 680ms ease forwards;
+}
+
+.paolaConfirmationEyebrow {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #777;
+}
+
+.paolaConfirmationModal h2 {
+  margin: 0 0 14px;
+  color: #111;
+  font-size: clamp(26px, 5vw, 34px);
+  line-height: 1.15;
+  font-weight: 600;
+}
+
+.paolaConfirmationIntro {
+  margin: 0 auto 24px;
+  max-width: 340px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.paolaConfirmationDetails {
+  display: grid;
+  gap: 17px;
+  padding: 23px;
+  margin-bottom: 21px;
+  background: #f6f6f6;
+  border: 1px solid #ededed;
+  border-radius: 12px;
+  text-align: left;
+}
+
+.paolaConfirmationDetails > div {
+  display: grid;
+  gap: 5px;
+}
+
+.paolaConfirmationDetails span {
+  color: #888;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+}
+
+.paolaConfirmationDetails strong {
+  color: #171717;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.paolaConfirmationNote {
+  margin: 0 0 23px;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.paolaConfirmationDone {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid #111;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 200ms ease, transform 200ms ease;
+}
+
+.paolaConfirmationDone:hover:not(:disabled) {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+.paolaConfirmationDone:disabled {
+  cursor: default;
+}
+
+.paolaConfirmationClosing {
+  animation: paolaOverlayOut 400ms ease forwards;
+}
+
+.paolaConfirmationClosing .paolaConfirmationModal {
+  animation: paolaModalOut 400ms ease forwards;
+}
+
+.paolaPageLeaving {
+  animation: paolaPageOut 450ms ease forwards;
+}
+
+@keyframes paolaOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes paolaOverlayOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes paolaModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes paolaModalOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(.98);
+  }
+}
+
+@keyframes paolaDrawCheck {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes paolaPageOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@media (max-width: 480px) {
+  .paolaConfirmationModal {
+    padding: 30px 22px 24px;
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paolaConfirmationOverlay,
+  .paolaConfirmationModal,
+  .paolaConfirmationCircle,
+  .paolaConfirmationTick,
+  .paolaConfirmationClosing,
+  .paolaConfirmationClosing .paolaConfirmationModal,
+  .paolaPageLeaving {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+  }
+}

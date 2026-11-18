@@ -1,11 +1,74 @@
-node_modules
+﻿# Dependencies
+node_modules/
+.pnp.*
+.yarn/
+
+# Environment variables and secrets
+.env
+.env.*
 .env*
-.next
-next-env.d.ts
-/dist/
-.vinext/
-.cloudflare/
-.env.local
+!.env.example
+!.env.sample
 .dev.vars
 .dev.vars.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Next.js and Vinext
+.next/
+out/
+dist/
+build/
+.vinext/
+.open-next/
+next-env.d.ts
+*.tsbuildinfo
+
+# Cloudflare
+.wrangler/
+.cloudflare/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Backups and temporary files
+backups/
+*backup*/
+*.bak
+*.backup-*
+*.before-*
+*.predeploy-*
+*.step*.bak
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Existing project-specific backup
 app/api/bookings/route.backup.ts.txt
+
+# Local D1 databases and migration test state
+migration/.local-d1*/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Timestamped backups
+*.bak-*
+*.backup-*
+*.before-*
+*.predeploy-*
+
+# Backup image assets
+public/images/*-backup.*
+public/images/*-original.*
+
+# Temporary migration reports
+migration/audit/

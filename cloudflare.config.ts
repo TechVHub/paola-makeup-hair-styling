@@ -27,6 +27,12 @@ export default defineConfig({
     },
 
     env: {
+      // Cloudflare D1 database
+      DB: bindings.d1({
+        name: "paola-makeup-production",
+        id: "487d7773-0d6e-4dfe-83b5-3e8000d105ce",
+      }),
+
       // Cloudflare services
       ASSETS: bindings.assets(),
       IMAGES: bindings.images(),

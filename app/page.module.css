@@ -2,7 +2,7 @@
 /* ==========================================
    PAOLA MAKEUP & HAIR STYLES
    HOMEPAGE STYLES
-   PHASE 7B-02 — MOBILE RESPONSIVENESS
+   PHASE 7B-02 ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â MOBILE RESPONSIVENESS
    ========================================== */
 
 .site {
@@ -141,7 +141,7 @@
 
 .hero {
   display: grid;
-  grid-template-columns: 51% 49%;
+  grid-template-columns: 40% 60%;
   min-height: 690px;
   background: #080808;
 }
@@ -268,7 +268,7 @@
       rgba(0, 0, 0, 0.35),
       transparent 35%
     ),
-    url("/images/paola-hero.jpeg");
+    url("/images/paola-home-cover.jpeg");
 
   background-size: cover;
   background-position: center, center 20%;
@@ -1013,5 +1013,161 @@
   .brandLogo {
     width: 56px;
     height: 56px;
+  }
+}
+
+/* PHASE 1B: CATEGORY GALLERIES */
+.servicePhotoLink {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: pointer;
+}
+.servicePhotoLink img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.serviceViewGallery {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  background: rgba(0,0,0,.85);
+  color: white;
+  padding: 12px 15px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+.portfolioCategories {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 1200px;
+  margin: 0 auto 38px;
+}
+.portfolioCategoryLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #d8d8d8;
+  padding: 15px 19px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: background .2s, color .2s;
+}
+.portfolioCategoryLink:hover,
+.portfolioCategoryLink:focus-visible {
+  background: #111;
+  color: #fff;
+}
+.portfolioExplore {
+  display: block;
+  margin-top: 14px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+@media(max-width:600px) {
+  .portfolioCategories {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .portfolioCategoryLink {
+    justify-content: space-between;
+    padding: 14px 12px;
+    font-size: 9px;
+  }
+}
+/* PHASE 1B BOOKING BUTTON HOVER */
+
+.serviceAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 48px;
+  padding: 15px 20px;
+  border: 1px solid #111111;
+  background: #111111;
+  color: #ffffff !important;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.serviceAction span {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.serviceAction:hover {
+  background: #ffffff;
+  color: #111111 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.serviceAction:hover span {
+  transform: translate(4px, -4px);
+}
+
+.serviceAction:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .serviceAction,
+  .serviceAction span {
+    transition: none;
+  }
+
+  .serviceAction:hover {
+    transform: none;
+  }
+
+  .serviceAction:hover span {
+    transform: none;
+  }
+}
+/* PHASE 1B ROUNDED BOOKING BUTTONS */
+
+.serviceAction {
+  border-radius: 12px;
+}
+
+/* Paola portrait logo - circular correction */
+.brandLogo {
+  width: 100px !important;
+  height: 100px !important;
+  min-width: 100px;
+  min-height: 100px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  object-position: 65% 55%;
+  display: block;
+  overflow: hidden;
+  border: 2px solid white;
+}
+
+@media (max-width: 768px) {
+  .brandLogo {
+    width: 70px !important;
+    height: 70px !important;
+    min-width: 70px;
+    min-height: 70px;
   }
 }

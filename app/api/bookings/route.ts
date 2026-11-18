@@ -1,6 +1,7 @@
+import { getD1 } from "@/lib/d1";
 
 import { env } from "cloudflare:workers";
-import { createClient } from "@supabase/supabase-js";
+
 import { Resend } from "resend";
 
 export const runtime = "edge";
@@ -377,6 +378,262 @@ async function sendBookingNotifications(
 // POST /api/bookings
 // --------------------------------------------------
 
+// PAOLA_D1_BOOKING_MIGRATION
+// Database operations run server-side. No D1 access from the browser.
+
+type D1Service = {
+  id: string;
+  name: string;
+  price: string;
+  duration_minutes: number;
+  is_active: number;
+};
+
+type D1Settings = {
+  timezone: string;
+  booking_enabled: number;
+  minimum_notice_hours: number;
+  booking_window_days: number;
+};
+
+type D1Hours = {
+  day_of_week: number;
+  is_open: number;
+  open_time: string;
+  close_time: string;
+};
+
+class BookingRuleError extends Error {}
+
+function getLocalParts(date: Date, timezone: string) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+
+  const parts = Object.fromEntries(
+    formatter
+      .formatToParts(date)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value])
+  );
+
+  const year = Number(parts.year);
+  const month = Number(parts.month);
+  const day = Number(parts.day);
+
+  return {
+    date: `${parts.year}-${parts.month}-${parts.day}`,
+    time: `${parts.hour}:${parts.minute}:${parts.second}`,
+    dayOfWeek: new Date(
+      Date.UTC(year, month - 1, day)
+    ).getUTCDay(),
+  };
+}
+
+function toSeconds(value: string): number {
+  const pieces = value.split(":").map(Number);
+
+  if (
+    pieces.length < 2 ||
+    pieces.length > 3 ||
+    pieces.some((part) => !Number.isInteger(part))
+  ) {
+    throw new Error("Invalid business hours.");
+  }
+
+  return pieces[0] * 3600 +
+    pieces[1] * 60 +
+    (pieces[2] ?? 0);
+}
+
+async function createD1Booking(
+  db: D1Database,
+  details: {
+    serviceId: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+    customerNotes: string;
+    appointmentDate: Date;
+  }
+): Promise<{ bookingId: string; serviceName: string }> {
+  const {
+    serviceId,
+    customerName,
+    customerEmail,
+    customerPhone,
+    customerNotes,
+    appointmentDate,
+  } = details;
+
+  const service = await db
+    .prepare(
+      `SELECT id, name, price, duration_minutes, is_active
+       FROM services WHERE id = ?`
+    )
+    .bind(serviceId)
+    .first<D1Service>();
+
+  if (!service || !service.is_active) {
+    throw new BookingRuleError("Service is unavailable");
+  }
+
+  const settings = await db
+    .prepare(
+      `SELECT timezone, booking_enabled,
+              minimum_notice_hours, booking_window_days
+       FROM business_settings WHERE id = 1`
+    )
+    .first<D1Settings>();
+
+  if (!settings || !settings.booking_enabled) {
+    throw new BookingRuleError(
+      "Online booking is unavailable"
+    );
+  }
+
+  const startMs = appointmentDate.getTime();
+  const nowMs = Date.now();
+
+  if (
+    startMs <
+    nowMs + settings.minimum_notice_hours * 3600000
+  ) {
+    throw new BookingRuleError(
+      "Booking does not meet minimum notice"
+    );
+  }
+
+  if (
+    startMs >
+    nowMs + settings.booking_window_days * 86400000
+  ) {
+    throw new BookingRuleError(
+      "Booking date is too far in advance"
+    );
+  }
+
+  const endDate = new Date(
+    startMs + service.duration_minutes * 60000
+  );
+
+  const startLocal = getLocalParts(
+    appointmentDate,
+    settings.timezone
+  );
+
+  const endLocal = getLocalParts(
+    endDate,
+    settings.timezone
+  );
+
+  const hours = await db
+    .prepare(
+      `SELECT day_of_week, is_open, open_time, close_time
+       FROM business_hours WHERE day_of_week = ?`
+    )
+    .bind(startLocal.dayOfWeek)
+    .first<D1Hours>();
+
+  if (!hours || !hours.is_open) {
+    throw new BookingRuleError(
+      "Business is closed on this day"
+    );
+  }
+
+  if (
+    startLocal.date !== endLocal.date ||
+    toSeconds(startLocal.time) < toSeconds(hours.open_time) ||
+    toSeconds(endLocal.time) > toSeconds(hours.close_time)
+  ) {
+    throw new BookingRuleError(
+      "Appointment is outside business hours"
+    );
+  }
+
+  const startsAt = appointmentDate.toISOString();
+  const endsAt = endDate.toISOString();
+
+  const blocked = await db
+    .prepare(
+      `SELECT id FROM availability_blocks
+       WHERE starts_at < ? AND ends_at > ?
+       LIMIT 1`
+    )
+    .bind(endsAt, startsAt)
+    .first();
+
+  if (blocked) {
+    throw new BookingRuleError(
+      "Selected time is unavailable"
+    );
+  }
+
+  const bookingId = crypto.randomUUID();
+
+  try {
+    await db
+      .prepare(
+        `INSERT INTO bookings (
+          id,
+          service_id,
+          customer_name,
+          customer_email,
+          customer_phone,
+          customer_notes,
+          starts_at,
+          ends_at,
+          quoted_price,
+          status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`
+      )
+      .bind(
+        bookingId,
+        serviceId,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerNotes || null,
+        startsAt,
+        endsAt,
+        service.price
+      )
+      .run();
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "";
+
+    // SQLite trigger errors vary by driver; do not expose
+    // raw database errors to customers.
+    if (
+      /overlap|already booked|conflict/i.test(message)
+    ) {
+      throw new BookingRuleError(
+        "Selected time is already booked"
+      );
+    }
+
+    if (/blocked|unavailable/i.test(message)) {
+      throw new BookingRuleError(
+        "Selected time is unavailable"
+      );
+    }
+
+    throw error;
+  }
+
+  return {
+    bookingId,
+    serviceName: service.name,
+  };
+}
 export async function POST(request: Request) {
   try {
     // 1. Validate request format.
@@ -593,73 +850,38 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Connect to Supabase.
+    // 4. Save the appointment in Cloudflare D1.
+    // Turnstile and request validation have already passed.
 
-    const supabaseUrl = getEnvironment(
-      "NEXT_PUBLIC_SUPABASE_URL"
-    );
+    const db = getD1();
 
-    const supabaseSecret = getEnvironment(
-      "SUPABASE_SERVICE_ROLE_KEY"
-    );
+    if (!db) {
+      throw new Error("Cloudflare D1 binding DB is unavailable.");
+    }
 
-    const supabase = createClient(
-      supabaseUrl,
-      supabaseSecret,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      }
-    );
+    let bookingId: string;
+    let serviceName: string;
 
-    // 5. Create booking through existing RPC.
-    // Database rules remain unchanged.
+    try {
+      const created = await createD1Booking(db, {
+        serviceId,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerNotes,
+        appointmentDate,
+      });
 
-    const { data, error } = await supabase.rpc(
-      "create_customer_booking",
-      {
-        p_service_id: serviceId,
-        p_customer_name: customerName,
-        p_customer_email: customerEmail,
-        p_customer_phone: customerPhone,
-        p_customer_notes:
-          customerNotes || null,
-        p_starts_at:
-          appointmentDate.toISOString(),
-      }
-    );
-
-    if (error) {
-      const knownMessages = [
-        "Service is unavailable",
-        "Online booking is unavailable",
-        "Booking does not meet minimum notice",
-        "Booking date is too far in advance",
-        "Valid customer information is required",
-        "Business is closed on this day",
-        "Appointment is outside business hours",
-        "Selected time is unavailable",
-        "Selected time is already booked",
-      ];
-
-      const safeMessage = knownMessages.find(
-        (message) =>
-          error.message.includes(message)
-      );
-
-      if (safeMessage) {
-        return respond(
-          { error: safeMessage },
-          409
-        );
+      bookingId = created.bookingId;
+      serviceName = created.serviceName;
+    } catch (error) {
+      if (error instanceof BookingRuleError) {
+        return respond({ error: error.message }, 409);
       }
 
       console.error(
-        "Supabase booking error:",
-        error.code,
-        error.message
+        "D1 booking insert failed:",
+        error instanceof Error ? error.message : "Unknown error"
       );
 
       return respond(
@@ -671,36 +893,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // 6. Booking successfully created.
-    // Email delivery must never undo the booking.
-
-    const bookingId = String(data ?? "");
-
-    // Look up the service name for notifications.
-    // This is optional; booking creation is already
-    // complete regardless of lookup success.
-
-    let serviceName = "Beauty Appointment";
-
-    try {
-      const serviceResult = await supabase
-        .from("services")
-        .select("name")
-        .eq("id", serviceId)
-        .maybeSingle();
-
-      if (
-        !serviceResult.error &&
-        typeof serviceResult.data?.name ===
-          "string"
-      ) {
-        serviceName = serviceResult.data.name;
-      }
-    } catch {
-      console.error(
-        "Unable to load service name for email."
-      );
-    }
+    // 5. Booking successfully saved in D1.
+    // Notification failures must not undo the booking.
 
     // 7. Attempt email notifications.
     // Never return a booking failure after the
@@ -726,7 +920,7 @@ export async function POST(request: Request) {
     return respond(
       {
         success: true,
-        bookingId: data,
+        bookingId,
         status: "pending",
         message:
           "Your appointment request has been received.",

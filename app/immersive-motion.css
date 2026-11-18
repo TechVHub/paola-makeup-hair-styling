@@ -1,0 +1,121 @@
+﻿/* ==========================================
+   PAOLA - BOLD IMMERSIVE MOTION
+   ========================================== */
+
+/* Smooth image zoom on service cards */
+.paola-motion-enabled [class*="servicePhoto"] {
+  overflow: hidden;
+}
+
+.paola-motion-enabled [class*="servicePhoto"] img {
+  transition:
+    transform 1.45s cubic-bezier(.16,1,.3,1),
+    filter 1.2s ease;
+  transform: scale(1);
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .paola-motion-enabled
+  [class*="serviceCard"]:hover
+  [class*="servicePhoto"] img {
+    transform: scale(1.17);
+    filter: contrast(1.07) saturate(1.08);
+  }
+}
+
+/* Service card lift */
+.paola-motion-enabled [class*="serviceCard"] {
+  transition:
+    transform .85s cubic-bezier(.16,1,.3,1),
+    box-shadow .85s ease,
+    opacity .85s ease;
+}
+
+@media (hover: hover) {
+  .paola-motion-enabled
+  [class*="serviceCard"]:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 24px 55px rgba(0,0,0,.16);
+  }
+}
+
+/* Portfolio cinematic zoom */
+.paola-motion-enabled [class*="portfolioCard"] {
+  overflow: hidden;
+}
+
+.paola-motion-enabled [class*="portfolioCard"] img {
+  transition:
+    transform 1.65s cubic-bezier(.16,1,.3,1),
+    filter 1.4s ease;
+  transform: scale(1);
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .paola-motion-enabled
+  [class*="portfolioCard"]:hover img {
+    transform: scale(1.22);
+    filter: contrast(1.1) brightness(.85);
+  }
+}
+
+/* Reversible scroll reveal */
+.paola-motion-enabled .paola-reveal {
+  opacity: .35;
+  scale: .955;
+  transition:
+    opacity 1.05s cubic-bezier(.16,1,.3,1),
+    scale 1.05s cubic-bezier(.16,1,.3,1);
+}
+
+.paola-motion-enabled .paola-reveal.paola-visible {
+  opacity: 1;
+  scale: 1;
+}
+
+/* Scroll depth for hero and about photography */
+.paola-motion-enabled [class*="heroPhoto"],
+.paola-motion-enabled [class*="aboutPhoto"] {
+  --paola-parallax: 0px;
+  background-position:
+    center calc(50% + var(--paola-parallax));
+}
+
+/* Enhanced interactive links */
+.paola-motion-enabled [class*="headerButton"],
+.paola-motion-enabled [class*="whiteButton"],
+.paola-motion-enabled [class*="blackButton"] {
+  transition:
+    transform .4s cubic-bezier(.16,1,.3,1),
+    background-color .4s ease,
+    color .4s ease;
+}
+
+@media (hover: hover) {
+  .paola-motion-enabled
+  [class*="headerButton"]:hover,
+  .paola-motion-enabled
+  [class*="whiteButton"]:hover,
+  .paola-motion-enabled
+  [class*="blackButton"]:hover {
+    transform: translateY(-4px) scale(1.035);
+  }
+}
+
+/* Respect accessibility preferences */
+@media (prefers-reduced-motion: reduce) {
+  .paola-motion-enabled .paola-reveal,
+  .paola-motion-enabled [class*="serviceCard"],
+  .paola-motion-enabled [class*="servicePhoto"] img,
+  .paola-motion-enabled [class*="portfolioCard"] img,
+  .paola-motion-enabled [class*="headerButton"],
+  .paola-motion-enabled [class*="whiteButton"],
+  .paola-motion-enabled [class*="blackButton"] {
+    opacity: 1 !important;
+    scale: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

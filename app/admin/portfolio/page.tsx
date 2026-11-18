@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "../../../lib/supabase";
 import styles from "./page.module.css";
+import CollectionManager from "./CollectionManager";
+import { portfolioAdminApi, portfolioAdminLoad } from "../../../lib/portfolio-admin-api";
 
 type Photo = {
   id: string;
@@ -13,6 +15,9 @@ type Photo = {
   category: string;
   description: string | null;
   image_path: string;
+  image_position_y: number;
+  image_position_x: number;
+  image_zoom: number;
   is_featured: boolean;
   sort_order: number;
 };
@@ -38,19 +43,20 @@ export default function PortfolioAdminPage() {
   const [category, setCategory] = useState("makeup");
   const [description, setDescription] = useState("");
 
+  const [editing, setEditing] = useState<Photo | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editImagePositionY, setEditImagePositionY] = useState(0);
+  const [editImagePositionX, setEditImagePositionX] = useState(50);
+  const [editImageZoom, setEditImageZoom] = useState(100);
+  const [replacementFile, setReplacementFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
   const loadPhotos = useCallback(async () => {
-    const { data, error: queryError } = await getSupabase()
-      .from("portfolio_photos")
-      .select("*")
-      .order("sort_order")
-      .order("created_at", { ascending: false });
-
-    if (queryError) throw queryError;
-
-    setPhotos((data ?? []) as Photo[]);
+    const result = await portfolioAdminLoad<{ photos: Photo[] }>();
+    setPhotos(result.photos);
   }, []);
 
   useEffect(() => {
@@ -150,19 +156,10 @@ export default function PortfolioAdminPage() {
 
       uploaded = true;
 
-      const { error: insertError } =
-        await supabase
-          .from("portfolio_photos")
-          .insert({
-            title: title.trim(),
-            category,
-            description: description.trim() || null,
-            image_path: path,
-            is_featured: true,
-            sort_order: photos.length + 1,
-          });
-
-      if (insertError) throw insertError;
+      await portfolioAdminApi("createPhoto", { photo: {
+        title: title.trim(), category, description: description.trim() || null,
+        image_path: path, is_featured: true, sort_order: photos.length + 1,
+      }});
 
       setTitle("");
       setDescription("");
@@ -205,13 +202,7 @@ export default function PortfolioAdminPage() {
     setMessage("");
 
     try {
-      const { error: updateError } =
-        await getSupabase()
-          .from("portfolio_photos")
-          .update(changes)
-          .eq("id", photo.id);
-
-      if (updateError) throw updateError;
+      await portfolioAdminApi("updatePhoto", { id: photo.id, changes });
 
       await loadPhotos();
       setMessage("Portfolio updated.");
@@ -226,6 +217,134 @@ export default function PortfolioAdminPage() {
     }
   }
 
+  function beginEdit(photo: Photo) {
+    setEditing(photo);
+    setEditTitle(photo.title);
+    setEditCategory(photo.category);
+    setEditDescription(photo.description ?? "");
+    setEditImagePositionY(photo.image_position_y ?? 0);
+    setEditImagePositionX(photo.image_position_x ?? 50);
+    setEditImageZoom(photo.image_zoom ?? 100);
+    setReplacementFile(null);
+    setError("");
+    setMessage("");
+  }
+
+  function cancelEdit() {
+    if (busy) return;
+    setEditing(null);
+    setReplacementFile(null);
+  }
+
+  async function saveEditedPhoto(
+    event: React.FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+    if (!editing || busy) return;
+
+    if (!editTitle.trim()) {
+      setError("Photo title is required.");
+      return;
+    }
+
+    const newFile = replacementFile;
+
+    if (newFile) {
+      if (
+        !["image/jpeg", "image/png", "image/webp"].includes(
+          newFile.type
+        )
+      ) {
+        setError("Use a JPEG, PNG, or WebP image.");
+        return;
+      }
+
+      if (newFile.size > 5 * 1024 * 1024) {
+        setError("Image must be 5 MB or smaller.");
+        return;
+      }
+    }
+
+    setBusy(true);
+    setError("");
+    setMessage("");
+
+    const supabase = getSupabase();
+    let newPath: string | null = null;
+    let databaseUpdated = false;
+
+    try {
+      if (newFile) {
+        const extension =
+          newFile.type === "image/png"
+            ? "png"
+            : newFile.type === "image/webp"
+            ? "webp"
+            : "jpg";
+
+        newPath = `${crypto.randomUUID()}.${extension}`;
+
+        const { error: uploadError } =
+          await supabase.storage
+            .from(bucket)
+            .upload(newPath, newFile, {
+              contentType: newFile.type,
+              upsert: false,
+            });
+
+        if (uploadError) throw uploadError;
+      }
+
+      const changes = {
+        title: editTitle.trim(),
+        category: editCategory,
+        description: editDescription.trim() || null,
+        image_position_y: editImagePositionY,
+        image_position_x: editImagePositionX,
+        image_zoom: editImageZoom,
+        ...(newPath ? { image_path: newPath } : {}),
+      };
+
+      await portfolioAdminApi("updatePhoto", { id: editing.id, changes });
+      databaseUpdated = true;
+      // Keep old Storage image until an audited reference-safe cleanup.
+      const cleanupWarning = newPath !== null;
+      await loadPhotos();
+
+      setEditing(null);
+      setReplacementFile(null);
+
+      setMessage(
+        cleanupWarning
+          ? "Photo updated. Previous image retained safely in Storage."
+          : "Portfolio photo updated successfully."
+      );
+    } catch (err) {
+      if (newPath && !databaseUpdated) {
+        await supabase.storage
+          .from(bucket)
+          .remove([newPath]);
+      }
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to save portfolio changes."
+      );
+
+      if (databaseUpdated) {
+        setEditing(null);
+        setReplacementFile(null);
+        try {
+          await loadPhotos();
+        } catch {
+          // Update succeeded; refresh can reload the gallery.
+        }
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
   async function removePhoto(photo: Photo) {
     if (
       busy ||
@@ -241,30 +360,9 @@ export default function PortfolioAdminPage() {
     setMessage("");
 
     try {
-      const supabase = getSupabase();
-
-      const { error: deleteError } =
-        await supabase
-          .from("portfolio_photos")
-          .delete()
-          .eq("id", photo.id);
-
-      if (deleteError) throw deleteError;
-
-      const { error: storageError } =
-        await supabase.storage
-          .from(bucket)
-          .remove([photo.image_path]);
-
+      await portfolioAdminApi("deletePhoto", { id: photo.id });
       await loadPhotos();
-
-      if (storageError) {
-        setMessage(
-          "Gallery entry deleted. Storage cleanup needs attention."
-        );
-      } else {
-        setMessage("Photo deleted.");
-      }
+      setMessage("Photo removed from gallery. Image file retained in Storage for safety.");
     } catch (err) {
       setError(
         err instanceof Error
@@ -330,6 +428,7 @@ export default function PortfolioAdminPage() {
           </div>
         )}
 
+        <CollectionManager />
         <section className={styles.uploadPanel}>
           <h2 className={styles.sectionTitle}>
             Upload New Photo
@@ -341,7 +440,7 @@ export default function PortfolioAdminPage() {
           >
             <label className={styles.field}>
               <span>
-                Photo (JPEG, PNG, WebP — max 5 MB)
+                Photo (JPEG, PNG, WebP - max 5 MB)
               </span>
 
               <input
@@ -414,6 +513,240 @@ export default function PortfolioAdminPage() {
           </form>
         </section>
 
+        {editing && (
+          <section className={styles.editPanel} id="portfolio-editor">
+            <div className={styles.editHeader}>
+              <h2 className={styles.sectionTitle}>
+                Edit Portfolio Photo
+              </h2>
+              <button
+                type="button"
+                className={styles.cancelButton}
+                disabled={busy}
+                onClick={cancelEdit}
+              >
+                CANCEL
+              </button>
+            </div>
+
+            <div className={styles.editLayout}>
+              <img
+                src={photoUrl(editing.image_path)}
+                alt={editing.title}
+                className={styles.editPreview}
+              />
+
+              <form
+                className={styles.uploadForm}
+                onSubmit={saveEditedPhoto}
+              >
+                <label className={styles.field}>
+                  <span>Photo Title</span>
+                  <input
+                    value={editTitle}
+                    maxLength={120}
+                    required
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                </label>
+
+                <label className={styles.field}>
+                  <span>Category</span>
+                  <select
+                    value={editCategory}
+                    onChange={(e) => setEditCategory(e.target.value)}
+                  >
+                    <option value="makeup">Makeup</option>
+                    <option value="bridal">Bridal</option>
+                    <option value="hair">Hair Styling</option>
+                    <option value="special_event">Special Event</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+
+                <label className={styles.field}>
+                  <span>Description (Optional)</span>
+                  <textarea
+                    rows={3}
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                  />
+                </label>
+
+                                <div className={styles.framingPanel}>
+                  <h3>Photo Framing</h3>
+                  <p>
+                    Zoom and reposition the image for gallery cards.
+                    The original photograph stays unchanged.
+                  </p>
+
+                  <div className={styles.framingPreview}>
+                    {/* PAOLA_ZOOMOUT_ADMIN_V3 */}
+                    <img
+                      className={styles.framingBlur}
+                      src={photoUrl(editing.image_path)}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                    <img
+                      className={styles.framingMain}
+                      src={photoUrl(editing.image_path)}
+                      alt={`Framing preview: ${editing.title}`}
+                      style={{
+                        objectFit: editImageZoom < 100 ? "contain" : "cover",
+                        objectPosition: `${editImagePositionX}% ${editImagePositionY}%`,
+                        transform: `scale(${editImageZoom / 100})`,
+                        transformOrigin: `${editImagePositionX}% ${editImagePositionY}%`,
+                      }}
+                    />
+                  </div>
+
+                  <div className={styles.framingControls}>
+                    <label className={styles.framingSlider}>
+                      <span>Zoom: {editImageZoom}%</span>
+                      <input
+                        type="range"
+                        min={50}
+                        max={300}
+                        step={5}
+                        value={editImageZoom}
+                        disabled={busy}
+                        onChange={(e) =>
+                          setEditImageZoom(Number(e.target.value))
+                        }
+                      />
+                    </label>
+
+                    <label className={styles.framingSlider}>
+                      <span>Horizontal: {editImagePositionX}%</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={editImagePositionX}
+                        disabled={busy}
+                        onChange={(e) =>
+                          setEditImagePositionX(Number(e.target.value))
+                        }
+                      />
+                    </label>
+
+                    <label className={styles.framingSlider}>
+                      <span>Vertical: {editImagePositionY}%</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={editImagePositionY}
+                        disabled={busy}
+                        onChange={(e) =>
+                          setEditImagePositionY(Number(e.target.value))
+                        }
+                      />
+                    </label>
+                  </div>
+
+                  <div className={styles.framingDirection}>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setEditImagePositionY(v => Math.min(100, v + 5))}
+                    >
+                      UP
+                    </button>
+                    <div className={styles.framingDirectionRow}>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setEditImagePositionX(v => Math.min(100, v + 5))}
+                      >
+                        LEFT
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => setEditImagePositionX(v => Math.max(0, v - 5))}
+                      >
+                        RIGHT
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setEditImagePositionY(v => Math.max(0, v - 5))}
+                    >
+                      DOWN
+                    </button>
+                  </div>
+
+                  <div className={styles.framingPresets}>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => {
+                        setEditImagePositionX(50);
+                        setEditImagePositionY(0);
+                      }}
+                    >
+                      TOP
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => {
+                        setEditImagePositionX(50);
+                        setEditImagePositionY(50);
+                      }}
+                    >
+                      CENTER
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => {
+                        setEditImagePositionX(50);
+                        setEditImagePositionY(0);
+                        setEditImageZoom(100);
+                      }}
+                    >
+                      RESET
+                    </button>
+                  </div>
+
+                  <p className={styles.framingHint}>
+                    Adjust the preview, then select SAVE CHANGES.
+                    Direction buttons move the visible image in
+                    five-percent steps.
+                  </p>
+                </div>
+<label className={styles.field}>
+                  <span>Replace Picture (Optional, max 5 MB)</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) =>
+                      setReplacementFile(e.target.files?.[0] ?? null)
+                    }
+                  />
+                </label>
+
+                <p className={styles.editHint}>
+                  Leave the picture field empty to keep the current image.
+                </p>
+
+                <button
+                  type="submit"
+                  className={styles.primaryButton}
+                  disabled={busy || !editTitle.trim()}
+                >
+                  {busy ? "SAVING..." : "SAVE CHANGES"}
+                </button>
+              </form>
+            </div>
+          </section>
+        )}
         <div className={styles.galleryHeading}>
           <h2>Your Portfolio ({photos.length})</h2>
         </div>
@@ -435,6 +768,11 @@ export default function PortfolioAdminPage() {
                 alt={photo.title}
                 loading="lazy"
                 className={styles.photoImage}
+                style={{
+                  objectPosition: `${photo.image_position_x ?? 50}% ${photo.image_position_y ?? 0}%`,
+                  transform: `scale(${(photo.image_zoom ?? 100) / 100})`,
+                  transformOrigin: `${photo.image_position_x ?? 50}% ${photo.image_position_y ?? 0}%`,
+                }}
               />
 
               <div className={styles.photoContent}>
@@ -485,6 +823,20 @@ export default function PortfolioAdminPage() {
                 </label>
 
                 <button
+  type="button"
+  disabled={busy}
+  onClick={() => {
+    beginEdit(photo);
+    window.setTimeout(() => {
+      document.getElementById("portfolio-editor")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 0);
+  }}
+  className={styles.editButton}
+>
+  EDIT PHOTO
+</button>
+<button
                   type="button"
                   disabled={busy}
                   onClick={() => removePhoto(photo)}
